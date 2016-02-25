@@ -147,8 +147,10 @@ gulp.task('release', ['release-module'], function(){
 		.pipe(uploadToCDN())
 })
 ```
-1、项目开始前，通过gulp init -p YourProjectName 来初始化项目
-2、开发和发布两套命令，开发：gulp，发布：gulp release
+1、项目开始前，通过gulp init -p YourProjectName 来初始化项目 
+
+2、开发和发布两套命令，开发：gulp，发布：gulp release 
+
 3、需要自行编写gulp插件来替换html中引用资源的路径，原理也很简单，在构建webpack模块后，将产出的文件列表与原文件的映射关系保存在数组，查找html中引用的js路径，替换成hash后就可以了。
 
 通过以上方法，就可以满足我们项目之前的需求，基本上做到自动化，自动构建，自动发布脚本，html文件走内部发布系统发布。
