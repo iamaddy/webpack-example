@@ -86,3 +86,69 @@ plugins: [
 ]
 };
 ```
+
+#### gulp跑起来
+
+webpack最终是当做gulp的一个插件来运行，读取的上述的webpack配置文件。
+
+```
+gulp.task('watch-html', function() {
+	// upload
+});
+
+gulp.task('watch-module', function() {
+	var watchPath = [
+		'../js/**',
+		'../css/**',
+		'../widget/**',
+		'js/**',
+		'css/**',
+		'tpl/**'
+	];
+	gulp.watch(watchPath, function(event){
+		gulp.src(watchPath)
+			.pipe(webpack(require('webpack.config')))
+			.pipe(gulp.dest(releaseRelativePath + projectName))
+			.pipe(upload(opt, function(err, data){})
+	})
+});
+
+gulp.task('default', ['watch-html', 'watch-module']);
+
+// release build webpack module
+gulp.task('release-module', function() {
+	var releasePath = [
+		'../js/**',
+		'../css/**',
+		'../widget/**',
+		'js/**',
+		'css/**',
+		'tpl/**'
+	];
+	return gulp.src(watchPath)
+				.pipe(webpack(require('webpack.config')))
+				.pipe(uglify())
+				.pipe(hash())
+				.pipe(rename(function(path) {
+				// 获取当前的日期，将发布文件已日期归类，更方便查找文件
+					path.dirname = path.dirname + '/' + year + month + day;
+				})
+				.pipe(gulp.dest(releaseRelativePath + projectName))
+				.pipe(upload(opt, function(err, data){})
+	})
+});
+
+// release build html
+gulp.task('release', ['release-module'], function(){
+	gulp.src(['**/*.html'])
+		.pipe(parseHtml(releaseRelativePath + projectName, CDN_URL))
+		.pipe(gulp.dest(releaseRelativePath + projectName))
+		.pipe(upload(opt, function(err, data){})
+		.pipe(uploadToCDN())
+})
+```
+1、项目开始前，通过gulp init -p YourProjectName 来初始化项目
+2、开发和发布两套命令，开发：gulp，发布：gulp release
+3、需要自行编写gulp插件来替换html中引用资源的路径，原理也很简单，在构建webpack模块后，将产出的文件列表与原文件的映射关系保存在数组，查找html中引用的js路径，替换成hash后就可以了。
+
+通过以上方法，就可以满足我们项目之前的需求，基本上做到自动化，自动构建，自动发布脚本，html文件走内部发布系统发布。
